@@ -1,11 +1,73 @@
 <html>
+
 <head>
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
   <script src="main.js"></script>
   <script>
+    let web3 = new Web3(Web3.givenProvider || "wss://eth-mainnet.g.alchemy.com/v2/r5WGZpEkZN0sd4TVdmWmJvSUCXWka9ud");
 
+    const contract_address = "0xa64f148865D0867110364928DFE7BdC18c9Dd02D";
+    // const data = require('../../contracts/artifacts/Storage_metadata.json');
+    // const web3 = new Web3();
+
+    // const abi = data['output']['abi'];
+    const abi = [
+      {
+        "inputs": [],
+        "name": "retrieve",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "num",
+            "type": "uint256"
+          }
+        ],
+        "name": "store",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ];
+    let contract;
+    window.addEventListener('load', () => {
+      if (typeof (web3) === 'undefined') {
+        return console.log("Metamask is not installed");
+      }
+      contract = web3.eth.contract(abi).at(contract_address);
+      contract.message.call((error, result) => {
+        if (error) {
+          return console.log(error);
+        }
+        $('#message').text(result);
+      });
+    });
+    function setMessage() {
+      let message = $('#new_message').val();
+      contract.setMessage.sendTransaction(
+        message,
+        { gasPrice: web3.toWei(4.1, 'Gwei') },
+        (error, result) => {
+          if (error) {
+            return console.log(error);
+          }
+          console.log("txhash: " + result);
+        }
+      );
+    }
   </script>
 </head>
+
 <body>
   <div id="message"></div>
 
@@ -13,4 +75,5 @@
   Введите число: <input type="number" id="new_message" />
   <button onclick="setMessage()">Сохранить в блокчейне</button>
 </body>
+
 </html>
